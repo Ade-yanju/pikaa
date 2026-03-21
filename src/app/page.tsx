@@ -22,7 +22,6 @@ import {
   Activity,
   PhoneCall,
   Gift,
-  RefreshCcw,
   MapPin,
 } from "lucide-react";
 
@@ -301,10 +300,19 @@ export default function PickarLandingPage() {
 // --- SUB-COMPONENTS ---
 
 // --- GLOBAL COVERAGE TABS (Solves the "Messy List" problem) ---
-function GlobalCoverageTabs() {
-  const [activeTab, setActiveTab] = useState("europe");
+type BrandItem = { name: string; icon: React.ElementType; color: string };
+type RegionDef = {
+  name: string;
+  countries?: string[];
+  isBrands?: boolean;
+  items?: BrandItem[];
+};
 
-  const regions = {
+function GlobalCoverageTabs() {
+  const [activeTab, setActiveTab] = useState<string>("europe");
+
+  // Explicitly typing this object solves the Vercel Build Error
+  const regions: Record<string, RegionDef> = {
     europe: {
       name: "Europe",
       countries: [
@@ -375,6 +383,8 @@ function GlobalCoverageTabs() {
     },
   };
 
+  const currentRegion = regions[activeTab];
+
   return (
     <div className="bg-white/[0.02] border border-white/5 rounded-3xl overflow-hidden p-2 backdrop-blur-sm">
       {/* Tab Navigation */}
@@ -405,36 +415,28 @@ function GlobalCoverageTabs() {
             transition={{ duration: 0.3 }}
             className="w-full flex flex-wrap justify-center gap-3"
           >
-            {regions[activeTab as keyof typeof regions].isBrands
-              ? // Render Brand Badges
-                regions[activeTab as keyof typeof regions].items?.map(
-                  (brand, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors"
-                    >
-                      <brand.icon
-                        className="w-6 h-6"
-                        style={{ color: brand.color }}
-                      />
-                      <span className="text-white font-medium">
-                        {brand.name}
-                      </span>
-                    </div>
-                  ),
-                )
-              : // Render Country Pills
-                regions[activeTab as keyof typeof regions].countries?.map(
-                  (country, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors cursor-default"
-                    >
-                      <MapPin className="w-3.5 h-3.5 text-emerald-500/70" />
-                      <span className="text-sm">{country}</span>
-                    </div>
-                  ),
-                )}
+            {currentRegion.isBrands
+              ? currentRegion.items?.map((brand, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors"
+                  >
+                    <brand.icon
+                      className="w-6 h-6"
+                      style={{ color: brand.color }}
+                    />
+                    <span className="text-white font-medium">{brand.name}</span>
+                  </div>
+                ))
+              : currentRegion.countries?.map((country, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-colors cursor-default"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-emerald-500/70" />
+                    <span className="text-sm">{country}</span>
+                  </div>
+                ))}
           </motion.div>
         </AnimatePresence>
       </div>
