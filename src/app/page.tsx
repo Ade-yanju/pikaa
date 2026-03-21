@@ -477,13 +477,13 @@ function PricingCalculator() {
             onClick={() => setPerspective("client")}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${perspective === "client" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white"}`}
           >
-            I'm Paying (Client)
+            I&apos;m Paying (Client)
           </button>
           <button
             onClick={() => setPerspective("talent")}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${perspective === "talent" ? "bg-white/10 text-white" : "text-slate-400 hover:text-white"}`}
           >
-            I'm Earning (Talent)
+            {`I'm Earning (Talent)`}
           </button>
         </div>
       </div>
@@ -592,7 +592,7 @@ function PickarChatbotEngine({
     setTimeout(() => {
       let botResponse = "";
       let newQuickReplies: string[] = [];
-      let linkObj = {};
+      let linkObj: { isLink?: boolean; linkUrl?: string; text?: string } = {};
       let nextState = chatState;
 
       // STATE ROUTING LOGIC
@@ -685,15 +685,15 @@ function PickarChatbotEngine({
       setChatState(nextState);
       setIsTyping(false);
 
-      if (linkObj.isLink) {
+      if (linkObj.isLink && linkObj.text && linkObj.linkUrl) {
         setMessages((prev) => [
           ...prev,
           { sender: "bot", text: botResponse },
           {
             sender: "bot",
-            text: linkObj.text,
+            text: linkObj.text as string,
             isLink: true,
-            linkUrl: linkObj.linkUrl,
+            linkUrl: linkObj.linkUrl as string,
           },
         ]);
       } else {
