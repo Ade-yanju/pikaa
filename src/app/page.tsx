@@ -75,7 +75,7 @@ const LiveTicker = () => {
 
 // --- MAIN PAGE COMPONENT ---
 export default function PickarLandingPage() {
-  const escrowWhatsAppNumber = "447435852195";
+  const escrowWhatsAppNumber = "+57 3026790484";
   const supportPhoneNumber = "+1 (448) 201-1421";
 
   const whatsappMessage = encodeURIComponent(
@@ -379,6 +379,7 @@ function GlobalCoverageTabs() {
         { name: "Payoneer", icon: SiPayoneer, color: "#FF4800" },
         { name: "Revolut", icon: SiRevolut, color: "#FFFFFF" },
         { name: "Gift Cards", icon: Gift, color: "#A855F7" },
+        { name: "Interac e-Transfer", icon: Gift, color: "#A855F7" },
       ],
     },
   };
