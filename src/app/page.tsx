@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldCheck,
@@ -104,21 +105,25 @@ export default function PickarLandingPage() {
               }}
             />
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5">
             <a
               href={`tel:${supportPhoneNumber}`}
               className="hidden md:flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
             >
               <PhoneCall className="w-4 h-4" /> Support
             </a>
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-semibold text-black bg-white hover:bg-slate-200 px-5 py-2.5 rounded-full transition-colors flex items-center gap-2"
+            <Link
+              href="/login"
+              className="text-sm font-medium text-slate-300 hover:text-white transition-colors"
             >
-              Start Transaction
-            </a>
+              Log in
+            </Link>
+            <Link
+              href="/register"
+              className="text-sm font-semibold text-black bg-emerald-500 hover:bg-emerald-400 px-5 py-2.5 rounded-full transition-colors flex items-center gap-2"
+            >
+              Get Started
+            </Link>
           </div>
         </div>
       </nav>

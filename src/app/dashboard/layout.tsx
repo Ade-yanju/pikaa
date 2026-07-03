@@ -1,0 +1,67 @@
+import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
+import { requireUser } from "@/lib/dal";
+import { logout } from "@/app/(auth)/actions";
+import AppBackground from "@/components/AppBackground";
+import SideNav from "@/components/SideNav";
+import MessageNotifier from "@/components/MessageNotifier";
+import PushSetup from "@/components/PushSetup";
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const profile = await requireUser();
+  const initial = (profile.full_name || profile.email || "U")
+    .charAt(0)
+    .toUpperCase();
+
+  return (
+    <div className="min-h-screen text-slate-200 flex flex-col">
+      <AppBackground />
+      <MessageNotifier currentUserId={profile.id} role={profile.role} />
+      <PushSetup />
+
+      <header className="border-b border-white/10 bg-[#070909]/70 backdrop-blur-xl sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+          <Link href="/" className="text-white font-bold text-xl tracking-tighter">
+            Pickar<span className="text-emerald-400">.</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            {profile.role === "admin" && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-1.5 text-sm text-emerald-400 hover:text-emerald-300"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span className="hidden sm:inline">Support Console</span>
+              </Link>
+            )}
+            <div className="flex items-center gap-2.5 pl-4 border-l border-white/10">
+              <span className="grid place-items-center w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-400 text-sm font-semibold">
+                {initial}
+              </span>
+              <div className="hidden sm:block leading-tight">
+                <p className="text-white text-sm font-medium">
+                  {profile.full_name || "Freelancer"}
+                </p>
+                <p className="text-[11px] text-slate-500">{profile.email}</p>
+              </div>
+              <form action={logout}>
+                <button className="ml-1 text-sm text-slate-400 hover:text-white transition-colors">
+                  Log out
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex-1 w-full max-w-6xl mx-auto px-5 py-7 flex gap-7 pb-24 md:pb-7">
+        <SideNav variant="user" />
+        <main className="flex-1 min-w-0">{children}</main>
+      </div>
+    </div>
+  );
+}
