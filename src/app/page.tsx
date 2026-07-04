@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import SiteFooter from "@/components/SiteFooter";
 import {
   ShieldCheck,
   ArrowRight,
@@ -24,6 +25,7 @@ import {
   PhoneCall,
   Gift,
   MapPin,
+  Bitcoin,
 } from "lucide-react";
 
 // --- IMPORT BRAND LOGOS ---
@@ -163,8 +165,8 @@ export default function PickarLandingPage() {
             className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl font-light leading-relaxed"
           >
             Pickar secures funds for global freelance projects, guarantees
-            instant payouts, and offers seamless gift card exchange across 25+
-            countries.
+            instant payouts, and lets you exchange gift cards and trade crypto
+            across 25+ countries.
           </motion.p>
 
           <motion.div
@@ -184,7 +186,57 @@ export default function PickarLandingPage() {
               Secure a Transaction
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
+            <Link
+              href="/register"
+              className="inline-flex items-center justify-center gap-2 border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold px-8 py-4 rounded-xl transition-colors"
+            >
+              Create free account
+            </Link>
           </motion.div>
+        </div>
+
+        {/* WHAT WE OFFER */}
+        <div className="mt-32">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              Everything you need to get paid
+            </h2>
+            <p className="text-slate-500 mt-3 max-w-2xl mx-auto">
+              One account for global payouts, gift-card exchange, crypto trading
+              and secure escrow — with a real support team behind every
+              transaction.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <FeatureCard
+              icon={<Wallet className="w-7 h-7 text-emerald-400" />}
+              title="Global Payouts"
+              description="Receive client payments through our company accounts and get settled to you, fast — across 25+ countries."
+            />
+            <FeatureCard
+              icon={<Gift className="w-7 h-7 text-purple-400" />}
+              title="Gift Card Exchange"
+              description="Turn Amazon, Apple, Steam and more into instant cash at transparent, competitive rates."
+            />
+            <FeatureCard
+              icon={<Bitcoin className="w-7 h-7 text-amber-400" />}
+              title="Crypto Trading"
+              description="Buy and sell BTC, ETH, USDT and more with a human on the other end and quoted rates."
+            />
+            <FeatureCard
+              icon={<ShieldCheck className="w-7 h-7 text-blue-400" />}
+              title="Secure Escrow"
+              description="Protect both sides of a deal — funds stay locked until the work is approved."
+            />
+          </div>
+          <div className="text-center mt-10">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-black bg-emerald-500 hover:bg-emerald-400 px-6 py-3 rounded-full transition-colors"
+            >
+              Get started free <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
 
         {/* GLOBAL COVERAGE & BANKING (TABBED INTERFACE) */}
@@ -255,43 +307,33 @@ export default function PickarLandingPage() {
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t border-white/5 bg-[#030303] pt-16 pb-8 relative z-10 mt-20">
-        <div className="max-w-7xl mx-auto px-6 text-center md:text-left flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-6 md:mb-0 flex flex-col items-center md:items-start">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-              <img
-                src="/pickar.png"
-                alt="Pickar Logo"
-                className="h-6 w-auto object-contain grayscale opacity-70"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                  e.currentTarget.parentElement?.insertAdjacentHTML(
-                    "beforeend",
-                    '<span class="text-white font-bold text-xl tracking-tighter">Pickar.</span>',
-                  );
-                }}
-              />
-            </div>
-            <p className="text-slate-500 text-sm">
-              The secure bridge for global work.
-              <br />
-              Support: {supportPhoneNumber}
+      {/* CAREERS TEASER */}
+      <section className="max-w-7xl mx-auto px-6 mt-32 relative z-10">
+        <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-500/10 via-transparent to-blue-500/10 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="max-w-xl text-center md:text-left">
+            <span className="inline-flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 rounded-full px-3 py-1.5">
+              We&apos;re hiring
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mt-4">
+              Join the team building borderless payments
+            </h2>
+            <p className="text-slate-400 mt-3">
+              We&apos;re looking for a{" "}
+              <span className="text-white font-semibold">Graphics Designer</span>,
+              support specialists, engineers and more — all remote.
             </p>
           </div>
-          <div className="flex gap-6 text-sm text-slate-500">
-            <a href="#" className="hover:text-emerald-400 transition-colors">
-              Terms of Service
-            </a>
-            <a href="#" className="hover:text-emerald-400 transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-emerald-400 transition-colors">
-              Dispute Policy
-            </a>
-          </div>
+          <Link
+            href="/careers"
+            className="shrink-0 inline-flex items-center gap-2 text-sm font-semibold text-black bg-emerald-500 hover:bg-emerald-400 px-7 py-3.5 rounded-full transition-colors"
+          >
+            View open roles <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
-      </footer>
+      </section>
+
+      {/* FOOTER */}
+      <SiteFooter />
 
       {/* ROBUST FLOATING AI CHATBOT ENGINE */}
       <PickarChatbotEngine
