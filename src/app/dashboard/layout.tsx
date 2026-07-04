@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { requireUser } from "@/lib/dal";
+import { WHATSAPP_CHANNEL_URL } from "@/lib/constants";
 import { logout } from "@/app/(auth)/actions";
 import AppBackground from "@/components/AppBackground";
 import SideNav from "@/components/SideNav";
@@ -29,13 +31,23 @@ export default async function DashboardLayout({
             Pickar<span className="text-emerald-400">.</span>
           </Link>
           <div className="flex items-center gap-4">
+            <a
+              href={WHATSAPP_CHANNEL_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-sm text-[#25D366] hover:opacity-80 transition-opacity"
+              title="Join our WhatsApp channel"
+            >
+              <SiWhatsapp className="w-4 h-4" />
+              <span className="hidden sm:inline">Channel</span>
+            </a>
             {profile.role === "admin" && (
               <Link
                 href="/admin"
-                className="flex items-center gap-1.5 text-sm text-emerald-400 hover:text-emerald-300"
+                className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span className="hidden sm:inline">Support Console</span>
+                <ArrowLeftRight className="w-4 h-4" />
+                <span className="hidden sm:inline">Switch to Admin</span>
               </Link>
             )}
             <div className="flex items-center gap-2.5 pl-4 border-l border-white/10">

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { CompanyAccount } from "@/lib/types";
 import AccountCreateForm from "./AccountCreateForm";
 import ToggleButton from "./ToggleButton";
+import DeleteAccountButton from "./DeleteAccountButton";
 
 export const metadata = { title: "Company Accounts — Pickar Support" };
 
@@ -47,7 +48,10 @@ export default async function AccountsPage() {
                       <p className="text-xs text-slate-500">{a.region}</p>
                     )}
                   </div>
-                  <ToggleButton id={a.id} active={a.is_active} />
+                  <div className="flex items-center gap-3">
+                    <ToggleButton id={a.id} active={a.is_active} />
+                    <DeleteAccountButton id={a.id} label={a.label} />
+                  </div>
                 </div>
                 <dl className="grid grid-cols-[130px_1fr] gap-y-1 text-sm text-slate-300 mt-3">
                   <Detail k="Account name" v={a.account_name} />

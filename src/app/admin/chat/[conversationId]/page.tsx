@@ -4,7 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
 import ChatRoom from "@/components/ChatRoom";
-import type { Message } from "@/lib/types";
+import ShareAccountControl from "@/components/ShareAccountControl";
+import type { CompanyAccount, Message } from "@/lib/types";
 
 export default async function AdminChatPage({
   params,
@@ -33,6 +34,12 @@ export default async function AdminChatPage({
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
 
+  const { data: accounts } = await supabase
+    .from("company_accounts")
+    .select("*")
+    .eq("is_active", true)
+    .order("currency");
+
   const name = profile?.full_name || profile?.email || "Freelancer";
 
   return (
@@ -55,12 +62,18 @@ export default async function AdminChatPage({
             {profile?.country ? ` · ${profile.country}` : ""}
           </p>
         </div>
-        <Link
-          href="/admin/requests"
-          className="ml-auto text-xs text-emerald-400 hover:text-emerald-300"
-        >
-          View requests →
-        </Link>
+        <div className="ml-auto flex items-center gap-3">
+          <ShareAccountControl
+            conversationId={conversationId}
+            accounts={(accounts as CompanyAccount[]) ?? []}
+          />
+          <Link
+            href="/admin/requests"
+            className="hidden sm:inline text-xs text-emerald-400 hover:text-emerald-300"
+          >
+            Requests →
+          </Link>
+        </div>
       </div>
 
       <ChatRoom

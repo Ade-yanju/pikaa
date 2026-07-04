@@ -42,6 +42,7 @@ create table if not exists public.messages (
   body             text,
   image_url        text,
   read_at          timestamptz,
+  reply_to         uuid references public.messages (id) on delete set null,
   created_at       timestamptz not null default now(),
   -- a message carries text, an image, or both
   constraint messages_content_check check (
@@ -278,6 +279,48 @@ create policy payment_requests_update on public.payment_requests
   with check (user_id = auth.uid() or public.is_admin());
 
 -- ----------------------------------------------------------------------------
+-- Trades: gift cards + crypto (see migrations/004_trades.sql)
+-- ----------------------------------------------------------------------------
+create table if not exists public.trades (
+  id               uuid primary key default gen_random_uuid(),
+  user_id          uuid not null references public.profiles (id) on delete cascade,
+  conversation_id  uuid references public.conversations (id) on delete set null,
+  type             text not null check (type in ('gift_card', 'crypto')),
+  side             text,
+  asset            text not null,
+  network          text,
+  amount           numeric(18, 2),
+  currency         text,
+  rate             numeric(18, 4),
+  payout_amount    numeric(18, 2),
+  secret_encrypted text,
+  image_url        text,
+  status           text not null default 'pending'
+                     check (status in ('pending','in_review','accepted','completed','rejected','cancelled')),
+  admin_note       text,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+create index if not exists trades_user_idx on public.trades (user_id, created_at desc);
+
+drop trigger if exists trades_touch on public.trades;
+create trigger trades_touch
+  before update on public.trades
+  for each row execute function public.touch_updated_at();
+
+alter table public.trades enable row level security;
+drop policy if exists trades_select on public.trades;
+create policy trades_select on public.trades
+  for select using (user_id = auth.uid() or public.is_admin());
+drop policy if exists trades_insert on public.trades;
+create policy trades_insert on public.trades
+  for insert with check (user_id = auth.uid());
+drop policy if exists trades_update on public.trades;
+create policy trades_update on public.trades
+  for update using (user_id = auth.uid() or public.is_admin())
+  with check (user_id = auth.uid() or public.is_admin());
+
+-- ----------------------------------------------------------------------------
 -- Web Push subscriptions (see migrations/003_push_subscriptions.sql)
 -- ----------------------------------------------------------------------------
 create table if not exists public.push_subscriptions (
@@ -302,6 +345,7 @@ create policy push_sub_select on public.push_subscriptions
 alter publication supabase_realtime add table public.messages;
 alter publication supabase_realtime add table public.conversations;
 alter publication supabase_realtime add table public.payment_requests;
+alter publication supabase_realtime add table public.trades;
 
 -- ----------------------------------------------------------------------------
 -- After your first login, promote yourself to admin:

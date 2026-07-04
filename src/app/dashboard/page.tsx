@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, MessagesSquare, Wallet, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowRight, MessagesSquare, Wallet, Clock, CheckCircle2, Gift, Bitcoin } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { requireUser } from "@/lib/dal";
+import { WHATSAPP_CHANNEL_URL } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { PAYMENT_STATUS_LABELS, type PaymentRequest } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
@@ -30,6 +32,27 @@ export default async function DashboardHome() {
         </p>
       </div>
 
+      {/* WhatsApp channel */}
+      <a
+        href={WHATSAPP_CHANNEL_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="group flex items-center gap-4 rounded-2xl border border-[#25D366]/30 bg-[#25D366]/[0.07] hover:bg-[#25D366]/[0.12] p-4 transition-colors"
+      >
+        <span className="grid place-items-center w-11 h-11 rounded-xl bg-[#25D366]/15 text-[#25D366] shrink-0">
+          <SiWhatsapp className="w-5 h-5" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-white text-sm font-semibold">Join our WhatsApp channel</p>
+          <p className="text-slate-400 text-xs">
+            Live rates, payout updates and announcements — straight to your phone.
+          </p>
+        </div>
+        <span className="text-sm font-semibold text-[#25D366] flex items-center gap-1 group-hover:gap-2 transition-all">
+          Join <ArrowRight className="w-4 h-4" />
+        </span>
+      </a>
+
       {/* stat row */}
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         <Stat label="Total requests" value={all.length} icon={<Wallet className="w-4 h-4" />} />
@@ -53,6 +76,20 @@ export default async function DashboardHome() {
           title="Chat with support"
           desc="Talk to the Pickar team in real time about your payments."
           cta="Open chat"
+        />
+        <ActionCard
+          href="/dashboard/gift-cards"
+          icon={<Gift className="w-6 h-6 text-slate-200" />}
+          title="Sell a gift card"
+          desc="Trade Amazon, Apple, Steam and more for cash. Card details are encrypted."
+          cta="Sell gift card"
+        />
+        <ActionCard
+          href="/dashboard/crypto"
+          icon={<Bitcoin className="w-6 h-6 text-slate-200" />}
+          title="Trade cryptocurrency"
+          desc="Buy or sell BTC, ETH, USDT and more with support. Wallet details are encrypted."
+          cta="Trade crypto"
         />
       </div>
 

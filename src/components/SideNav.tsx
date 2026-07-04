@@ -9,6 +9,9 @@ import {
   Inbox,
   Landmark,
   Users,
+  Gift,
+  Bitcoin,
+  ArrowLeftRight,
   type LucideIcon,
 } from "lucide-react";
 
@@ -18,11 +21,14 @@ const NAVS: Record<"user" | "admin", Item[]> = {
   user: [
     { href: "/dashboard", label: "Overview", short: "Home", icon: LayoutDashboard },
     { href: "/dashboard/chat", label: "Support Chat", short: "Chat", icon: MessagesSquare },
-    { href: "/dashboard/requests", label: "Payment Requests", short: "Requests", icon: Wallet },
+    { href: "/dashboard/requests", label: "Payment Requests", short: "Payments", icon: Wallet },
+    { href: "/dashboard/gift-cards", label: "Sell Gift Card", short: "Gift Cards", icon: Gift },
+    { href: "/dashboard/crypto", label: "Trade Crypto", short: "Crypto", icon: Bitcoin },
   ],
   admin: [
     { href: "/admin", label: "Inbox", short: "Inbox", icon: Inbox },
-    { href: "/admin/requests", label: "Payment Requests", short: "Requests", icon: Wallet },
+    { href: "/admin/requests", label: "Payment Requests", short: "Payments", icon: Wallet },
+    { href: "/admin/trades", label: "Trades", short: "Trades", icon: ArrowLeftRight },
     { href: "/admin/accounts", label: "Company Accounts", short: "Accounts", icon: Landmark },
     { href: "/admin/team", label: "Team & Admins", short: "Team", icon: Users },
   ],

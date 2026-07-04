@@ -151,6 +151,68 @@ export async function setUserRole(
   return { ok: true };
 }
 
+const TRADE_STATUSES = [
+  "pending",
+  "in_review",
+  "accepted",
+  "completed",
+  "rejected",
+  "cancelled",
+];
+
+/** Admin sets rate/payout/status on a gift-card or crypto trade. */
+export async function updateTrade(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin();
+  const supabase = await createClient();
+
+  const id = String(formData.get("id") || "");
+  const status = String(formData.get("status") || "");
+  const rate = formData.get("rate");
+  const payout = formData.get("payout_amount");
+  const note = String(formData.get("admin_note") || "").trim();
+
+  if (!id || !TRADE_STATUSES.includes(status)) {
+    return { error: "Invalid update." };
+  }
+
+  const { data: updated, error } = await supabase
+    .from("trades")
+    .update({
+      status,
+      rate: rate ? Number(rate) : null,
+      payout_amount: payout ? Number(payout) : null,
+      admin_note: note || null,
+    })
+    .eq("id", id)
+    .select("id, conversation_id, asset, payout_amount, currency")
+    .single();
+
+  if (error) {
+    console.error("updateTrade failed:", error.message);
+    return { error: "Could not update the trade." };
+  }
+
+  // Let the freelancer know in chat.
+  if (updated?.conversation_id) {
+    const { data: me } = await supabase.auth.getUser();
+    if (me?.user) {
+      const payoutTxt = payout ? ` Payout: ${updated.currency ?? ""} ${payout}.` : "";
+      await supabase.from("messages").insert({
+        conversation_id: updated.conversation_id,
+        sender_id: me.user.id,
+        sender_role: "admin",
+        body: `Your ${updated.asset} trade is now "${status}".${payoutTxt}${note ? `\n${note}` : ""}`,
+      });
+    }
+  }
+
+  revalidatePath("/admin/trades");
+  return { ok: true };
+}
+
 export async function toggleCompanyAccount(id: string, isActive: boolean) {
   await requireAdmin();
   const supabase = await createClient();
@@ -161,4 +223,56 @@ export async function toggleCompanyAccount(id: string, isActive: boolean) {
   if (error) return { error: "Could not update." };
   revalidatePath("/admin/accounts");
   return {};
+}
+
+export async function deleteCompanyAccount(id: string): Promise<ActionState> {
+  await requireAdmin();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("company_accounts")
+    .delete()
+    .eq("id", id);
+  if (error) {
+    console.error("deleteCompanyAccount failed:", error.message);
+    return { error: "Could not delete the account." };
+  }
+  revalidatePath("/admin/accounts");
+  return { ok: true };
+}
+
+/** Post a company account's details into a conversation as an admin message. */
+export async function shareAccountToConversation(
+  conversationId: string,
+  accountId: string,
+): Promise<ActionState> {
+  const me = await requireAdmin();
+  const supabase = await createClient();
+
+  const { data: acct } = await supabase
+    .from("company_accounts")
+    .select("*")
+    .eq("id", accountId)
+    .single<CompanyAccount>();
+  if (!acct) return { error: "Account not found." };
+
+  const lines = [
+    "💳 Payment details to receive your payout:",
+    acct.account_name && `Account name: ${acct.account_name}`,
+    acct.bank_name && `Bank: ${acct.bank_name}`,
+    acct.account_number && `Account number: ${acct.account_number}`,
+    acct.routing_number && `Routing/IBAN/SWIFT: ${acct.routing_number}`,
+    `Currency: ${acct.currency}`,
+  ].filter(Boolean);
+
+  const { error } = await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    sender_id: me.id,
+    sender_role: "admin",
+    body: lines.join("\n"),
+  });
+  if (error) {
+    console.error("shareAccountToConversation failed:", error.message);
+    return { error: "Could not share the account." };
+  }
+  return { ok: true };
 }

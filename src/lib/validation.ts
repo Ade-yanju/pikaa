@@ -39,4 +39,21 @@ export const companyAccountSchema = z.object({
   routing_number: z.string().trim().max(60).optional().or(z.literal("")),
 });
 
+export const giftCardSchema = z.object({
+  asset: z.string().trim().min(2, "Choose a brand").max(40),
+  network: z.string().trim().max(30).optional().or(z.literal("")), // e-code / physical
+  currency: z.string().trim().min(1).max(8),
+  amount: z.coerce.number().positive("Enter the card value"),
+  secret: z.string().trim().max(400).optional().or(z.literal("")), // card code
+});
+
+export const cryptoSchema = z.object({
+  side: z.enum(["buy", "sell"]),
+  asset: z.string().trim().min(2, "Choose an asset").max(20),
+  network: z.string().trim().max(30).optional().or(z.literal("")),
+  currency: z.string().trim().max(8).optional().or(z.literal("")),
+  amount: z.coerce.number().positive("Enter an amount"),
+  secret: z.string().trim().max(400).optional().or(z.literal("")), // wallet addr
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;

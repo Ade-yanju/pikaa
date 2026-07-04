@@ -1,18 +1,67 @@
 "use client";
 
 import {
+  Fragment,
   useEffect,
   useRef,
   useState,
   useTransition,
   type FormEvent,
 } from "react";
-import { Send, Loader2, ImagePlus, Check, CheckCheck, X } from "lucide-react";
+import { Send, Loader2, ImagePlus, Check, CheckCheck, X, Reply } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage, markMessagesRead } from "@/app/dashboard/actions";
+import SwipeToReply from "@/components/SwipeToReply";
 import type { Message, Role } from "@/lib/types";
 
+function senderLabel(m: Message, currentUserId: string) {
+  if (m.sender_id === currentUserId) return "You";
+  return m.sender_role === "admin" ? "Pickar Support" : "Freelancer";
+}
+
+function preview(m: Message) {
+  if (m.body) return m.body;
+  if (m.image_url) return "📷 Photo";
+  return "Message";
+}
+
 const MAX_BYTES = 8 * 1024 * 1024;
+
+// Split text into plain spans + clickable links.
+function linkify(text: string) {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noreferrer"
+        className="underline underline-offset-2 break-all"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
+}
+
+function sameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function dayLabel(d: Date) {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (sameDay(d, today)) return "Today";
+  if (sameDay(d, yesterday)) return "Yesterday";
+  return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+}
 
 export default function ChatRoom({
   conversationId,
@@ -32,12 +81,57 @@ export default function ChatRoom({
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [otherTyping, setOtherTyping] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+
+  function onReply(m: Message) {
+    setReplyingTo(m);
+    composerRef.current?.focus();
+  }
+  const typingChannelRef = useRef<ReturnType<
+    ReturnType<typeof createClient>["channel"]
+  > | null>(null);
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingSent = useRef(0);
 
   const markRead = () => {
     markMessagesRead(conversationId).catch(() => {});
   };
+
+  const typingLabel = viewerRole === "admin" ? "Freelancer" : "Pickar Support";
+
+  function notifyTyping() {
+    const now = Date.now();
+    if (now - lastTypingSent.current > 1200) {
+      lastTypingSent.current = now;
+      typingChannelRef.current?.send({
+        type: "broadcast",
+        event: "typing",
+        payload: {},
+      });
+    }
+  }
+
+  // Typing indicator over a broadcast channel.
+  useEffect(() => {
+    const supabase = createClient();
+    const ch = supabase.channel(`typing:${conversationId}`, {
+      config: { broadcast: { self: false } },
+    });
+    ch.on("broadcast", { event: "typing" }, () => {
+      setOtherTyping(true);
+      if (typingTimer.current) clearTimeout(typingTimer.current);
+      typingTimer.current = setTimeout(() => setOtherTyping(false), 3000);
+    }).subscribe();
+    typingChannelRef.current = ch;
+    return () => {
+      if (typingTimer.current) clearTimeout(typingTimer.current);
+      supabase.removeChannel(ch);
+    };
+  }, [conversationId]);
 
   // Live updates: new messages (INSERT) and read receipts (UPDATE).
   useEffect(() => {
@@ -90,11 +184,11 @@ export default function ChatRoom({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, pending, uploading]);
+  }, [messages, pending, uploading, otherTyping]);
 
-  function send(text: string, imageUrl?: string | null) {
+  function send(text: string, imageUrl?: string | null, replyTo?: string | null) {
     startTransition(async () => {
-      const res = await sendMessage(conversationId, text, imageUrl ?? null);
+      const res = await sendMessage(conversationId, text, imageUrl ?? null, replyTo ?? null);
       if (res?.error) {
         setError(res.error);
         if (!imageUrl) setBody(text);
@@ -108,7 +202,8 @@ export default function ChatRoom({
     if (!text || pending) return;
     setError(null);
     setBody("");
-    send(text);
+    send(text, null, replyingTo?.id);
+    setReplyingTo(null);
   }
 
   async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
@@ -135,8 +230,9 @@ export default function ChatRoom({
       if (!res.ok || !data.url) {
         setError(data.error ?? "Upload failed.");
       } else {
-        send(body.trim(), data.url); // send with optional caption
+        send(body.trim(), data.url, replyingTo?.id); // caption + reply
         setBody("");
+        setReplyingTo(null);
       }
     } catch {
       setError("Upload failed. Check your connection.");
@@ -156,14 +252,36 @@ export default function ChatRoom({
             {emptyHint ?? "No messages yet. Say hello 👋"}
           </p>
         ) : (
-          messages.map((m) => {
+          messages.map((m, i) => {
             const mine = m.sender_id === currentUserId;
             const fromSupport = m.sender_role === "admin";
+            const created = new Date(m.created_at);
+            const showDay =
+              i === 0 || !sameDay(created, new Date(messages[i - 1].created_at));
             return (
-              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+              <Fragment key={m.id}>
+                {showDay && (
+                  <div className="flex justify-center my-2">
+                    <span className="text-[11px] text-slate-400 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+                      {dayLabel(created)}
+                    </span>
+                  </div>
+                )}
+                <div className={`group flex items-center gap-1.5 ${mine ? "justify-end" : "justify-start"}`}>
+                {mine && (
+                  <button
+                    type="button"
+                    onClick={() => onReply(m)}
+                    className="hidden md:group-hover:grid place-items-center w-7 h-7 rounded-full text-slate-500 hover:text-white hover:bg-white/10 shrink-0"
+                    aria-label="Reply"
+                  >
+                    <Reply className="w-4 h-4" />
+                  </button>
+                )}
+                <SwipeToReply onReply={() => onReply(m)} className="max-w-[82%]">
                 <div
                   className={[
-                    "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed break-words",
+                    "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed break-words",
                     mine
                       ? "bg-emerald-500 text-black rounded-br-sm"
                       : fromSupport
@@ -171,6 +289,23 @@ export default function ChatRoom({
                         : "bg-white/5 text-slate-200 rounded-bl-sm",
                   ].join(" ")}
                 >
+                  {m.reply_to &&
+                    (() => {
+                      const ref = messages.find((x) => x.id === m.reply_to);
+                      return (
+                        <div
+                          className={`mb-1.5 rounded-md border-l-2 pl-2 pr-2 py-1 text-xs ${mine ? "border-black/40 bg-black/10" : "border-emerald-400/60 bg-white/5"}`}
+                        >
+                          <span className="block font-semibold opacity-80">
+                            {ref ? senderLabel(ref, currentUserId) : "Message"}
+                          </span>
+                          <span className="block opacity-70 line-clamp-2">
+                            {ref ? preview(ref) : "Original message"}
+                          </span>
+                        </div>
+                      );
+                    })()}
+
                   {!mine && (
                     <span className="block text-[11px] font-semibold mb-0.5 opacity-70">
                       {fromSupport ? "Pickar Support" : "Freelancer"}
@@ -188,7 +323,9 @@ export default function ChatRoom({
                     </a>
                   )}
 
-                  {m.body && <span className="whitespace-pre-wrap">{m.body}</span>}
+                  {m.body && (
+                    <span className="whitespace-pre-wrap">{linkify(m.body)}</span>
+                  )}
 
                   <span
                     className={`flex items-center gap-1 justify-end text-[10px] mt-1 ${mine ? "text-black/50" : "text-slate-500"}`}
@@ -205,9 +342,34 @@ export default function ChatRoom({
                       ))}
                   </span>
                 </div>
-              </div>
+                </SwipeToReply>
+                {!mine && (
+                  <button
+                    type="button"
+                    onClick={() => onReply(m)}
+                    className="hidden md:group-hover:grid place-items-center w-7 h-7 rounded-full text-slate-500 hover:text-white hover:bg-white/10 shrink-0"
+                    aria-label="Reply"
+                  >
+                    <Reply className="w-4 h-4" />
+                  </button>
+                )}
+                </div>
+              </Fragment>
             );
           })
+        )}
+
+        {otherTyping && (
+          <div className="flex justify-start">
+            <div className="bg-white/10 border border-white/10 rounded-2xl rounded-bl-sm px-3.5 py-3">
+              <span className="sr-only">{typingLabel} is typing</span>
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
+              </span>
+            </div>
+          </div>
         )}
 
         {myLast?.read_at && (
@@ -234,6 +396,25 @@ export default function ChatRoom({
         </div>
       )}
 
+      {replyingTo && (
+        <div className="flex items-stretch gap-2 px-3 pt-2 border-t border-white/10 bg-white/[0.02]">
+          <div className="w-1 rounded bg-emerald-400 shrink-0" />
+          <div className="flex-1 min-w-0 py-0.5">
+            <p className="text-xs font-semibold text-emerald-400">
+              Replying to {senderLabel(replyingTo, currentUserId)}
+            </p>
+            <p className="text-xs text-slate-400 truncate">{preview(replyingTo)}</p>
+          </div>
+          <button
+            onClick={() => setReplyingTo(null)}
+            className="text-slate-500 hover:text-white self-center shrink-0"
+            aria-label="Cancel reply"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <form
         onSubmit={submit}
         className="border-t border-white/10 p-3 flex items-end gap-2 bg-[#050505]/60"
@@ -256,8 +437,12 @@ export default function ChatRoom({
         </button>
 
         <textarea
+          ref={composerRef}
           value={body}
-          onChange={(e) => setBody(e.target.value)}
+          onChange={(e) => {
+            setBody(e.target.value);
+            notifyTyping();
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) submit(e);
           }}

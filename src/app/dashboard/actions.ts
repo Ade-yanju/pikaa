@@ -18,6 +18,7 @@ export async function sendMessage(
   conversationId: string,
   body: string,
   imageUrl?: string | null,
+  replyTo?: string | null,
 ): Promise<ActionState> {
   const profile = await getProfile();
   if (!profile) return { error: "Please log in again." };
@@ -31,13 +32,17 @@ export async function sendMessage(
   if (image && !/^https:\/\//.test(image)) return { error: "Invalid image." };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("messages").insert({
+  const payload: Record<string, unknown> = {
     conversation_id: conversationId,
     sender_id: profile.id,
     sender_role: profile.role, // 'user' or 'admin', trusted from the DAL
     body: text || null,
     image_url: image,
-  });
+  };
+  // Only set when replying, so normal chat works even before the migration.
+  if (replyTo) payload.reply_to = replyTo;
+
+  const { error } = await supabase.from("messages").insert(payload);
 
   if (error) {
     console.error("sendMessage failed:", error.message);
