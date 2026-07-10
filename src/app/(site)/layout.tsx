@@ -10,7 +10,7 @@ export default function SiteLayout({
   return (
     <div className="min-h-screen text-slate-200 flex flex-col">
       <AppBackground />
-      <header className="border-b border-white/10 bg-[#050505]/70 backdrop-blur-xl sticky top-0 z-40">
+      <header className="border-b border-white/10 bg-[#050505]/70 backdrop-blur-xl sticky top-0 z-40 pt-safe px-safe">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="text-white font-bold text-xl tracking-tighter">
             Pickar<span className="text-emerald-400">.</span>

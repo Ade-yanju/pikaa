@@ -91,7 +91,7 @@ export default function PickarLandingPage() {
       <SpotlightBackground />
 
       {/* NAVIGATION */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#050505]/70 backdrop-blur-xl">
+      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#050505]/70 backdrop-blur-xl pt-safe px-safe">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2 group cursor-pointer">
             <img

@@ -76,7 +76,7 @@ export default function PushSetup() {
   if (mode === "hidden") return null;
 
   return (
-    <div className="fixed bottom-20 md:bottom-5 left-1/2 -translate-x-1/2 z-[55] w-[min(94vw,420px)]">
+    <div className="fixed bottom-[calc(6rem_+_env(safe-area-inset-bottom))] md:bottom-5 left-1/2 -translate-x-1/2 z-[55] w-[min(94vw,420px)]">
       <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-[#0b0f0e]/95 backdrop-blur-xl p-4 shadow-2xl shadow-black/50">
         <span className="grid place-items-center w-9 h-9 rounded-lg bg-emerald-500/15 text-emerald-400 shrink-0">
           <Bell className="w-4 h-4" />

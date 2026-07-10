@@ -75,7 +75,7 @@ export default function SideNav({ variant }: { variant: "user" | "admin" }) {
 
       {/* mobile bottom bar */}
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/10 bg-[#070909]/90 backdrop-blur-xl grid"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/10 bg-[#070909]/90 backdrop-blur-xl grid bottom-nav-safe px-safe"
         style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
       >
         {items.map(({ href, short, icon: Icon }) => {

@@ -39,7 +39,7 @@ export default async function DashboardLayout({
       />
       <PushSetup />
 
-      <header className="border-b border-white/10 bg-[#070909]/70 backdrop-blur-xl sticky top-0 z-40">
+      <header className="border-b border-white/10 bg-[#070909]/70 backdrop-blur-xl sticky top-0 z-40 pt-safe px-safe">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <Link href="/" className="text-white font-bold text-xl tracking-tighter">
             Pickar<span className="text-emerald-400">.</span>
@@ -84,7 +84,7 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <div className="flex-1 w-full max-w-6xl mx-auto px-5 py-7 flex gap-7 pb-24 md:pb-7">
+      <div className="flex-1 w-full max-w-6xl mx-auto px-5 py-7 flex gap-7 pb-[calc(5.5rem_+_env(safe-area-inset-bottom))] md:pb-7">
         <SideNav variant="user" />
         <main className="flex-1 min-w-0">{children}</main>
       </div>

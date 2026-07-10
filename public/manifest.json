@@ -1,12 +1,15 @@
 {
-  "name": "Pickar",
+  "id": "/",
+  "name": "Pickar — Global Payments",
   "short_name": "Pickar",
-  "description": "Get paid anywhere — chat with support and request payment details.",
+  "description": "Get paid anywhere — chat with support, sell gift cards, trade crypto and request payment details.",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#050505",
   "theme_color": "#050505",
+  "categories": ["finance", "business", "productivity"],
   "icons": [
     {
       "src": "/pickar.png",
@@ -18,7 +21,18 @@
       "src": "/pickar.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/pickar.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    { "name": "Support Chat", "url": "/dashboard/chat" },
+    { "name": "Request Payment", "url": "/dashboard/requests" },
+    { "name": "Sell Gift Card", "url": "/dashboard/gift-cards" }
   ]
 }

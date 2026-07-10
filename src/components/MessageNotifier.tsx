@@ -101,7 +101,7 @@ export default function MessageNotifier({
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-20 right-4 z-[60] flex flex-col gap-2 w-[min(92vw,340px)]">
+    <div className="fixed top-[calc(5rem_+_env(safe-area-inset-top))] right-4 z-[60] flex flex-col gap-2 w-[min(92vw,340px)]">
       {toasts.map((t) => (
         <Link
           key={t.id}

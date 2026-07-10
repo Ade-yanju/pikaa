@@ -43,7 +43,7 @@ export default async function AdminChatPage({
   const name = profile?.full_name || profile?.email || "Freelancer";
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-11rem)] md:h-[calc(100vh-8rem)] rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
+    <div className="flex flex-col h-[calc(100dvh_-_12rem_-_env(safe-area-inset-bottom))] md:h-[calc(100vh_-_8rem)] rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-3">
         <Link
           href="/admin"

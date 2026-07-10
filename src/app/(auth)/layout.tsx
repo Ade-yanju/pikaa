@@ -11,7 +11,7 @@ export default function AuthLayout({
     <div className="min-h-screen text-slate-200 flex flex-col">
       <AppBackground />
 
-      <header className="px-6 h-20 flex items-center max-w-6xl mx-auto w-full">
+      <header className="px-6 h-20 flex items-center max-w-6xl mx-auto w-full pt-safe">
         <Link href="/" className="text-white font-bold text-2xl tracking-tighter">
           Pickar<span className="text-emerald-400">.</span>
         </Link>
