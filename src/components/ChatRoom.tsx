@@ -9,6 +9,7 @@ import {
   type FormEvent,
 } from "react";
 import { Send, Loader2, ImagePlus, Check, CheckCheck, X, Reply } from "lucide-react";
+import { SiWhatsapp } from "react-icons/si";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage, markMessagesRead } from "@/app/dashboard/actions";
 import SwipeToReply from "@/components/SwipeToReply";
@@ -69,12 +70,15 @@ export default function ChatRoom({
   viewerRole,
   initialMessages,
   emptyHint,
+  whatsappUrl,
 }: {
   conversationId: string;
   currentUserId: string;
   viewerRole: Role;
   initialMessages: Message[];
   emptyHint?: string;
+  /** When provided (user side), offers an optional WhatsApp fallback. */
+  whatsappUrl?: string;
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
@@ -83,6 +87,8 @@ export default function ChatRoom({
   const [pending, startTransition] = useTransition();
   const [otherTyping, setOtherTyping] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [, setNowTick] = useState(0); // re-render tick for the wait prompt
+  const [waHintDismissed, setWaHintDismissed] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -186,6 +192,14 @@ export default function ChatRoom({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, pending, uploading, otherTyping]);
 
+  // Tick periodically so the optional "still waiting?" WhatsApp prompt can
+  // surface after support has been quiet for a couple of minutes.
+  useEffect(() => {
+    if (!whatsappUrl || viewerRole === "admin") return;
+    const t = setInterval(() => setNowTick((n) => n + 1), 30000);
+    return () => clearInterval(t);
+  }, [whatsappUrl, viewerRole]);
+
   function send(text: string, imageUrl?: string | null, replyTo?: string | null) {
     startTransition(async () => {
       const res = await sendMessage(conversationId, text, imageUrl ?? null, replyTo ?? null);
@@ -243,6 +257,17 @@ export default function ChatRoom({
 
   // Index of my last message, to anchor the read-receipt line.
   const myLast = [...messages].reverse().find((m) => m.sender_id === currentUserId);
+
+  // Optional WhatsApp fallback: only when the freelancer's last message has
+  // gone unanswered by support for a couple of minutes.
+  const lastMsg = messages[messages.length - 1];
+  const waitingLong =
+    !!whatsappUrl &&
+    viewerRole !== "admin" &&
+    !waHintDismissed &&
+    !!lastMsg &&
+    lastMsg.sender_id === currentUserId &&
+    Date.now() - new Date(lastMsg.created_at).getTime() > 120_000;
 
   return (
     <div className="flex flex-col h-full">
@@ -384,6 +409,31 @@ export default function ChatRoom({
         )}
         <div ref={bottomRef} />
       </div>
+
+      {waitingLong && whatsappUrl && (
+        <div className="mx-3 mb-1 flex items-center gap-3 rounded-xl border border-[#25D366]/25 bg-[#25D366]/[0.06] px-3.5 py-2.5">
+          <SiWhatsapp className="w-5 h-5 text-[#25D366] shrink-0" />
+          <p className="text-xs text-slate-300 flex-1 leading-snug">
+            Support hasn&apos;t replied yet. You can keep waiting here — or
+            continue on WhatsApp if you prefer.
+          </p>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-semibold text-black bg-[#25D366] hover:opacity-90 px-3 py-1.5 rounded-lg shrink-0"
+          >
+            WhatsApp
+          </a>
+          <button
+            onClick={() => setWaHintDismissed(true)}
+            className="text-slate-500 hover:text-white shrink-0"
+            aria-label="Dismiss"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {error && (
         <div className="px-4 pb-1">

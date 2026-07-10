@@ -7,12 +7,13 @@ import NewGiftCardForm from "./NewGiftCardForm";
 export const metadata = { title: "Sell Gift Card — Pickar" };
 
 export default async function GiftCardsPage() {
-  await requireUser();
+  const profile = await requireUser();
   const supabase = await createClient();
 
   const { data } = await supabase
     .from("trades")
     .select("*")
+    .eq("user_id", profile.id)
     .eq("type", "gift_card")
     .order("created_at", { ascending: false });
 

@@ -14,6 +14,7 @@ export default async function DashboardHome() {
   const { data: requests } = await supabase
     .from("payment_requests")
     .select("*")
+    .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
 
   const all = (requests as PaymentRequest[]) ?? [];

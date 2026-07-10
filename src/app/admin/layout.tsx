@@ -17,7 +17,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen text-slate-200 flex flex-col">
       <AppBackground />
-      <MessageNotifier currentUserId={admin.id} role="admin" />
+      <MessageNotifier currentUserId={admin.id} surface="admin" />
       <PushSetup />
 
       <header className="border-b border-white/10 bg-[#070909]/70 backdrop-blur-xl sticky top-0 z-40">

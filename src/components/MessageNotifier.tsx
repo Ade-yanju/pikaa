@@ -5,16 +5,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MessagesSquare, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import type { Message, Role } from "@/lib/types";
+import type { Message } from "@/lib/types";
 
 type Toast = { id: string; text: string; href: string };
 
 export default function MessageNotifier({
   currentUserId,
-  role,
+  surface,
+  ownConversationId,
 }: {
   currentUserId: string;
-  role: Role;
+  // "admin" = support console (all conversations); "user" = only my own thread.
+  surface: "user" | "admin";
+  ownConversationId?: string | null;
 }) {
   const pathname = usePathname();
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -58,9 +61,15 @@ export default function MessageNotifier({
           const row = payload.new as Message;
           if (row.sender_id === currentUserId) return; // not my own
 
+          // On the user dashboard only notify about MY conversation — even if
+          // this account is an admin (who can technically read every thread).
+          if (surface === "user" && ownConversationId && row.conversation_id !== ownConversationId) {
+            return;
+          }
+
           const href =
-            role === "admin" ? `/admin/chat/${row.conversation_id}` : "/dashboard/chat";
-          const who = role === "admin" ? "New message from a freelancer" : "Pickar Support replied";
+            surface === "admin" ? `/admin/chat/${row.conversation_id}` : "/dashboard/chat";
+          const who = surface === "admin" ? "New message from a freelancer" : "Pickar Support replied";
           const preview = row.image_url ? "📷 Photo" : (row.body ?? "");
           const text = preview ? `${who}: ${preview.slice(0, 60)}` : who;
 
@@ -87,7 +96,7 @@ export default function MessageNotifier({
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUserId, role]);
+  }, [currentUserId, surface, ownConversationId]);
 
   if (toasts.length === 0) return null;
 

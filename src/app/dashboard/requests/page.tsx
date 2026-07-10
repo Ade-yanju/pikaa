@@ -12,12 +12,13 @@ import NewRequestForm from "./NewRequestForm";
 export const metadata = { title: "Payment Requests — Pickar" };
 
 export default async function RequestsPage() {
-  await requireUser();
+  const profile = await requireUser();
   const supabase = await createClient();
 
   const { data: requests } = await supabase
     .from("payment_requests")
     .select("*, company_accounts(*)")
+    .eq("user_id", profile.id)
     .order("created_at", { ascending: false });
 
   const rows = (requests as (PaymentRequest & {

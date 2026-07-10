@@ -7,12 +7,13 @@ import NewCryptoForm from "./NewCryptoForm";
 export const metadata = { title: "Trade Crypto — Pickar" };
 
 export default async function CryptoPage() {
-  await requireUser();
+  const profile = await requireUser();
   const supabase = await createClient();
 
   const { data } = await supabase
     .from("trades")
     .select("*")
+    .eq("user_id", profile.id)
     .eq("type", "crypto")
     .order("created_at", { ascending: false });
 

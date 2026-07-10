@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeftRight } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { requireUser } from "@/lib/dal";
+import { createClient } from "@/lib/supabase/server";
 import { WHATSAPP_CHANNEL_URL } from "@/lib/constants";
 import { logout } from "@/app/(auth)/actions";
 import AppBackground from "@/components/AppBackground";
@@ -19,10 +20,23 @@ export default async function DashboardLayout({
     .charAt(0)
     .toUpperCase();
 
+  const supabase = await createClient();
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("user_id", profile.id)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
   return (
     <div className="min-h-screen text-slate-200 flex flex-col">
       <AppBackground />
-      <MessageNotifier currentUserId={profile.id} role={profile.role} />
+      <MessageNotifier
+        currentUserId={profile.id}
+        surface="user"
+        ownConversationId={conv?.id ?? null}
+      />
       <PushSetup />
 
       <header className="border-b border-white/10 bg-[#070909]/70 backdrop-blur-xl sticky top-0 z-40">
