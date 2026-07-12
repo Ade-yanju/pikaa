@@ -15,9 +15,20 @@ import { sendMessage, markMessagesRead } from "@/app/dashboard/actions";
 import SwipeToReply from "@/components/SwipeToReply";
 import type { Message, Role } from "@/lib/types";
 
-function senderLabel(m: Message, currentUserId: string) {
+function senderLabel(
+  m: Message,
+  currentUserId: string,
+  viewerRole: Role,
+  names?: Record<string, string>,
+) {
   if (m.sender_id === currentUserId) return "You";
-  return m.sender_role === "admin" ? "Pickar Support" : "Freelancer";
+  const name = names?.[m.sender_id];
+  // Admins see everyone's real name (incl. which teammate replied).
+  if (viewerRole === "admin") {
+    return name ?? (m.sender_role === "admin" ? "Support" : "Freelancer");
+  }
+  // Freelancers see support as one team, and each other by name.
+  return m.sender_role === "admin" ? "Pickar Support" : name ?? "Freelancer";
 }
 
 function preview(m: Message) {
@@ -71,6 +82,7 @@ export default function ChatRoom({
   initialMessages,
   emptyHint,
   whatsappUrl,
+  names,
 }: {
   conversationId: string;
   currentUserId: string;
@@ -79,6 +91,8 @@ export default function ChatRoom({
   emptyHint?: string;
   /** When provided (user side), offers an optional WhatsApp fallback. */
   whatsappUrl?: string;
+  /** sender_id → display name (admins see freelancer + teammate names). */
+  names?: Record<string, string>;
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
@@ -322,7 +336,7 @@ export default function ChatRoom({
                           className={`mb-1.5 rounded-md border-l-2 pl-2 pr-2 py-1 text-xs ${mine ? "border-black/40 bg-black/10" : "border-emerald-400/60 bg-white/5"}`}
                         >
                           <span className="block font-semibold opacity-80">
-                            {ref ? senderLabel(ref, currentUserId) : "Message"}
+                            {ref ? senderLabel(ref, currentUserId, viewerRole, names) : "Message"}
                           </span>
                           <span className="block opacity-70 line-clamp-2">
                             {ref ? preview(ref) : "Original message"}
@@ -333,7 +347,7 @@ export default function ChatRoom({
 
                   {!mine && (
                     <span className="block text-[11px] font-semibold mb-0.5 opacity-70">
-                      {fromSupport ? "Pickar Support" : "Freelancer"}
+                      {senderLabel(m, currentUserId, viewerRole, names)}
                     </span>
                   )}
 
@@ -451,7 +465,7 @@ export default function ChatRoom({
           <div className="w-1 rounded bg-emerald-400 shrink-0" />
           <div className="flex-1 min-w-0 py-0.5">
             <p className="text-xs font-semibold text-emerald-400">
-              Replying to {senderLabel(replyingTo, currentUserId)}
+              Replying to {senderLabel(replyingTo, currentUserId, viewerRole, names)}
             </p>
             <p className="text-xs text-slate-400 truncate">{preview(replyingTo)}</p>
           </div>

@@ -41,7 +41,7 @@ export default async function ChatPage() {
   )}`;
 
   return (
-    <div className="flex flex-col h-[calc(100dvh_-_12rem_-_env(safe-area-inset-bottom))] md:h-[calc(100vh_-_8rem)] rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
+    <div className="flex flex-col overflow-hidden bg-[#050505] -mx-5 -mt-7 h-[calc(100dvh_-_8rem_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] md:mx-0 md:mt-0 md:h-[calc(100vh_-_8rem)] md:rounded-2xl md:border md:border-white/10 md:bg-white/[0.02]">
       <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
         <div className="min-w-0">
