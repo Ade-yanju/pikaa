@@ -1,3 +1,4 @@
+import { Lock } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { requireUser } from "@/lib/dal";
 import { createClient } from "@/lib/supabase/server";
@@ -46,8 +47,9 @@ export default async function ChatPage() {
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
         <div className="min-w-0">
           <p className="text-white text-sm font-semibold">Pickar Support</p>
-          <p className="text-xs text-slate-500">
-            Typically replies within business hours
+          <p className="text-xs text-slate-500 flex items-center gap-1">
+            <Lock className="w-3 h-3 text-emerald-400/70" /> Encrypted · replies in
+            business hours
           </p>
         </div>
         {/* Optional, non-mandatory WhatsApp fallback */}

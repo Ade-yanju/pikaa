@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldCheck, Globe, Wallet, MessagesSquare } from "lucide-react";
+import { ShieldCheck, Globe, Wallet, MessagesSquare, Lock, Headset } from "lucide-react";
 import AppBackground from "@/components/AppBackground";
 
 export default function AuthLayout({
@@ -39,7 +39,20 @@ export default function AuthLayout({
             </ul>
           </aside>
 
-          <div className="w-full max-w-md mx-auto lg:mx-0">{children}</div>
+          <div className="w-full max-w-md mx-auto lg:mx-0">
+            {children}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400/80" /> Bank-level encryption
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-emerald-400/80" /> Passwordless login
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Headset className="w-3.5 h-3.5 text-emerald-400/80" /> Real human support
+              </span>
+            </div>
+          </div>
         </div>
       </main>
     </div>

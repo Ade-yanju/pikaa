@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, MessagesSquare, Wallet, Clock, CheckCircle2, Gift, Bitcoin } from "lucide-react";
+import { ArrowRight, MessagesSquare, Wallet, Clock, CheckCircle2, Gift, Bitcoin, ShieldCheck } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { requireUser } from "@/lib/dal";
 import { WHATSAPP_CHANNEL_URL } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { PAYMENT_STATUS_LABELS, type PaymentRequest } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
+import TrustStrip from "@/components/TrustStrip";
 
 export default async function DashboardHome() {
   const profile = await requireUser();
@@ -31,6 +32,9 @@ export default async function DashboardHome() {
         <p className="text-slate-400 text-sm mt-1.5">
           Request your company payment details and our team will get you paid.
         </p>
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 rounded-full px-2.5 py-1 mt-3">
+          <ShieldCheck className="w-3 h-3" /> Account secured &amp; encrypted
+        </span>
       </div>
 
       {/* WhatsApp channel */}
@@ -62,36 +66,39 @@ export default async function DashboardHome() {
       </div>
 
       {/* actions */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        <ActionCard
-          href="/dashboard/requests"
-          icon={<Wallet className="w-6 h-6 text-emerald-400" />}
-          title="Request payment details"
-          desc="Tell us the amount and currency; support shares the account to receive your payout."
-          cta="New request"
-          primary
-        />
-        <ActionCard
-          href="/dashboard/chat"
-          icon={<MessagesSquare className="w-6 h-6 text-slate-200" />}
-          title="Chat with support"
-          desc="Talk to the Pickar team in real time about your payments."
-          cta="Open chat"
-        />
-        <ActionCard
-          href="/dashboard/gift-cards"
-          icon={<Gift className="w-6 h-6 text-slate-200" />}
-          title="Sell a gift card"
-          desc="Trade Amazon, Apple, Steam and more for cash. Card details are encrypted."
-          cta="Sell gift card"
-        />
-        <ActionCard
-          href="/dashboard/crypto"
-          icon={<Bitcoin className="w-6 h-6 text-slate-200" />}
-          title="Trade cryptocurrency"
-          desc="Buy or sell BTC, ETH, USDT and more with support. Wallet details are encrypted."
-          cta="Trade crypto"
-        />
+      <div>
+        <h2 className="text-sm font-semibold text-slate-400 mb-3">What would you like to do?</h2>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <ActionCard
+            href="/dashboard/requests"
+            icon={<Wallet className="w-5 h-5" />}
+            title="Request payment details"
+            desc="Tell us the amount and currency; support shares the account to receive your payout."
+            cta="New request"
+            primary
+          />
+          <ActionCard
+            href="/dashboard/chat"
+            icon={<MessagesSquare className="w-5 h-5" />}
+            title="Chat with support"
+            desc="Talk to the Pickar team in real time about your payments."
+            cta="Open chat"
+          />
+          <ActionCard
+            href="/dashboard/gift-cards"
+            icon={<Gift className="w-5 h-5" />}
+            title="Sell a gift card"
+            desc="Trade Amazon, Apple, Steam and more for cash — card details stay encrypted."
+            cta="Sell gift card"
+          />
+          <ActionCard
+            href="/dashboard/crypto"
+            icon={<Bitcoin className="w-5 h-5" />}
+            title="Trade cryptocurrency"
+            desc="Buy or sell BTC, ETH, USDT and more — wallet details stay encrypted."
+            cta="Trade crypto"
+          />
+        </div>
       </div>
 
       {/* recent */}
@@ -131,6 +138,11 @@ export default async function DashboardHome() {
             ))}
           </ul>
         )}
+      </div>
+
+      {/* trust footer */}
+      <div className="pt-2">
+        <TrustStrip />
       </div>
     </div>
   );
@@ -183,17 +195,21 @@ function ActionCard({
     <Link
       href={href}
       className={[
-        "group rounded-2xl border p-6 transition-all",
+        "group rounded-2xl border p-5 transition-all",
         primary
-          ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/12 to-transparent hover:border-emerald-500/50 hover:shadow-[0_0_40px_-12px_rgba(16,185,129,0.5)]"
+          ? "border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-transparent hover:border-emerald-500/50 hover:shadow-[0_0_40px_-12px_rgba(16,185,129,0.4)]"
           : "border-white/10 bg-white/[0.03] hover:border-white/25",
       ].join(" ")}
     >
-      {icon}
-      <h2 className="text-white font-semibold mt-3">{title}</h2>
-      <p className="text-sm text-slate-400 mt-1">{desc}</p>
       <span
-        className={`inline-flex items-center gap-1 text-sm mt-4 group-hover:gap-2 transition-all ${primary ? "text-emerald-400" : "text-slate-200"}`}
+        className={`grid place-items-center w-11 h-11 rounded-xl ${primary ? "bg-emerald-500/15 text-emerald-400" : "bg-white/5 border border-white/10 text-slate-200"}`}
+      >
+        {icon}
+      </span>
+      <h2 className="text-white font-semibold mt-3.5">{title}</h2>
+      <p className="text-sm text-slate-400 mt-1 leading-relaxed">{desc}</p>
+      <span
+        className={`inline-flex items-center gap-1 text-sm font-medium mt-4 group-hover:gap-2 transition-all ${primary ? "text-emerald-400" : "text-slate-200"}`}
       >
         {cta} <ArrowRight className="w-4 h-4" />
       </span>
