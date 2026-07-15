@@ -5,6 +5,55 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { registerSchema, otpSchema, emailSchema } from "@/lib/validation";
 import { sendOtpEmail } from "@/lib/resend";
+import { WHATSAPP_CHANNEL_URL } from "@/lib/constants";
+
+const WELCOME_MESSAGE = `👋 Welcome to Pickar! I'm here to help you get paid, fast.
+
+What would you like to do today?
+• 💳 Request company payment details
+• 🎁 Sell a gift card
+• ₿ Trade cryptocurrency
+
+Just reply here and our team will take it from there.
+
+📢 Join our WhatsApp channel for live rates & updates:
+${WHATSAPP_CHANNEL_URL}`;
+
+/**
+ * Drop an automated welcome into a new user's support conversation. Best-effort:
+ * failures never block registration. Sent as an admin so it reads as support.
+ */
+async function postWelcomeMessage(userId: string) {
+  try {
+    const admin = createAdminClient();
+    const [{ data: firstAdmin }, { data: conv }] = await Promise.all([
+      admin
+        .from("profiles")
+        .select("id")
+        .eq("role", "admin")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle(),
+      admin
+        .from("conversations")
+        .select("id")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    if (!conv?.id || !firstAdmin?.id) return; // needs an admin sender + a thread
+    await admin.from("messages").insert({
+      conversation_id: conv.id,
+      sender_id: firstAdmin.id,
+      sender_role: "admin",
+      body: WELCOME_MESSAGE,
+    });
+  } catch (e) {
+    console.error("postWelcomeMessage failed:", e);
+  }
+}
 
 export type AuthState = {
   error?: string;
@@ -67,7 +116,7 @@ export async function requestRegister(
   }
 
   const admin = createAdminClient();
-  const { error } = await admin.auth.admin.createUser({
+  const { data: created, error } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
     user_metadata: { full_name, country, phone: phone || null },
@@ -76,6 +125,9 @@ export async function requestRegister(
     console.error("createUser failed:", error.message);
     return { error: "Could not create your account. Please try again." };
   }
+
+  // Greet the new user in their support chat (best-effort).
+  if (created?.user?.id) await postWelcomeMessage(created.user.id);
 
   const err = await generateAndEmailOtp(email);
   if (err) return { error: err, email };
