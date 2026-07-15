@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, Settings } from "lucide-react";
 import { requireAdmin } from "@/lib/dal";
 import { logout } from "@/app/(auth)/actions";
 import AppBackground from "@/components/AppBackground";
@@ -31,6 +31,14 @@ export default async function AdminLayout({
             </span>
           </div>
           <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard/settings"
+              title="Edit your name & profile"
+              className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </Link>
             <Link
               href="/dashboard"
               className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-full transition-colors"

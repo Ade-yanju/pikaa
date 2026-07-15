@@ -65,15 +65,21 @@ export default async function DashboardLayout({
               </Link>
             )}
             <div className="flex items-center gap-2.5 pl-4 border-l border-white/10">
-              <span className="grid place-items-center w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-400 text-sm font-semibold">
-                {initial}
-              </span>
-              <div className="hidden sm:block leading-tight">
-                <p className="text-white text-sm font-medium">
-                  {profile.full_name || "Freelancer"}
-                </p>
-                <p className="text-[11px] text-slate-500">{profile.email}</p>
-              </div>
+              <Link
+                href="/dashboard/settings"
+                title="Edit your profile"
+                className="flex items-center gap-2.5 group"
+              >
+                <span className="grid place-items-center w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-400 text-sm font-semibold group-hover:bg-emerald-500/25 transition-colors">
+                  {initial}
+                </span>
+                <div className="hidden sm:block leading-tight">
+                  <p className="text-white text-sm font-medium group-hover:text-emerald-300 transition-colors">
+                    {profile.full_name || "Freelancer"}
+                  </p>
+                  <p className="text-[11px] text-slate-500">{profile.email}</p>
+                </div>
+              </Link>
               <form action={logout}>
                 <button className="ml-1 text-sm text-slate-400 hover:text-white transition-colors">
                   Log out

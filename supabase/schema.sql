@@ -37,8 +37,8 @@ create index if not exists conversations_last_message_idx on public.conversation
 create table if not exists public.messages (
   id               uuid primary key default gen_random_uuid(),
   conversation_id  uuid not null references public.conversations (id) on delete cascade,
-  sender_id        uuid not null references public.profiles (id) on delete cascade,
-  sender_role      text not null check (sender_role in ('user', 'admin')),
+  sender_id        uuid references public.profiles (id) on delete cascade,
+  sender_role      text not null check (sender_role in ('user', 'admin', 'system')),
   body             text,
   image_url        text,
   read_at          timestamptz,

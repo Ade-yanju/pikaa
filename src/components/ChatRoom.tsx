@@ -21,8 +21,9 @@ function senderLabel(
   viewerRole: Role,
   names?: Record<string, string>,
 ) {
-  if (m.sender_id === currentUserId) return "You";
-  const name = names?.[m.sender_id];
+  if (m.sender_role === "system") return "Pickar Support";
+  if (m.sender_id && m.sender_id === currentUserId) return "You";
+  const name = m.sender_id ? names?.[m.sender_id] : undefined;
   // Admins see everyone's real name (incl. which teammate replied).
   if (viewerRole === "admin") {
     return name ?? (m.sender_role === "admin" ? "Support" : "Freelancer");
@@ -292,8 +293,9 @@ export default function ChatRoom({
           </p>
         ) : (
           messages.map((m, i) => {
-            const mine = m.sender_id === currentUserId;
-            const fromSupport = m.sender_role === "admin";
+            const mine = !!m.sender_id && m.sender_id === currentUserId;
+            const fromSupport =
+              m.sender_role === "admin" || m.sender_role === "system";
             const created = new Date(m.created_at);
             const showDay =
               i === 0 || !sameDay(created, new Date(messages[i - 1].created_at));

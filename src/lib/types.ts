@@ -24,11 +24,13 @@ export type Conversation = {
   created_at: string;
 };
 
+export type SenderRole = "user" | "admin" | "system";
+
 export type Message = {
   id: string;
   conversation_id: string;
-  sender_id: string;
-  sender_role: Role;
+  sender_id: string | null;
+  sender_role: SenderRole;
   body: string | null;
   image_url: string | null;
   read_at: string | null;

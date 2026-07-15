@@ -26,30 +26,40 @@ ${WHATSAPP_CHANNEL_URL}`;
 async function postWelcomeMessage(userId: string) {
   try {
     const admin = createAdminClient();
-    const [{ data: firstAdmin }, { data: conv }] = await Promise.all([
-      admin
-        .from("profiles")
-        .select("id")
-        .eq("role", "admin")
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-      admin
-        .from("conversations")
-        .select("id")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+    const { data: conv } = await admin
+      .from("conversations")
+      .select("id")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (!conv?.id) return;
 
-    if (!conv?.id || !firstAdmin?.id) return; // needs an admin sender + a thread
-    await admin.from("messages").insert({
+    // Preferred: a neutral system message that reads as "Pickar Support".
+    const { error } = await admin.from("messages").insert({
       conversation_id: conv.id,
-      sender_id: firstAdmin.id,
-      sender_role: "admin",
+      sender_id: null,
+      sender_role: "system",
       body: WELCOME_MESSAGE,
     });
+    if (!error) return;
+
+    // Fallback (before migration 006): send from the first admin instead.
+    const { data: firstAdmin } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("role", "admin")
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (firstAdmin?.id) {
+      await admin.from("messages").insert({
+        conversation_id: conv.id,
+        sender_id: firstAdmin.id,
+        sender_role: "admin",
+        body: WELCOME_MESSAGE,
+      });
+    }
   } catch (e) {
     console.error("postWelcomeMessage failed:", e);
   }

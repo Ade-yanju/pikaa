@@ -10,6 +10,40 @@ import { sendNewRequestAlert } from "@/lib/resend";
 import { sendPushToUsers } from "@/lib/push";
 import type { ActionState } from "@/lib/types";
 
+/** Update the signed-in user's own profile (name, country, phone). */
+export async function updateProfile(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const profile = await getProfile();
+  if (!profile) return { error: "Please log in again." };
+
+  const full_name = String(formData.get("full_name") || "").trim();
+  const country = String(formData.get("country") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+
+  if (full_name.length < 2) return { error: "Enter your full name." };
+  if (full_name.length > 80) return { error: "Name is too long." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name,
+      country: country || null,
+      phone: phone || null,
+    })
+    .eq("id", profile.id);
+
+  if (error) {
+    console.error("updateProfile failed:", error.message);
+    return { error: "Could not save your profile." };
+  }
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
 /**
  * Post a message into a conversation. sender_role is derived server-side.
  * A message may carry text, an image (already uploaded via /api/upload), or both.

@@ -60,7 +60,8 @@ export default async function AdminChatPage({
   const handledBy = lastAdminMsg
     ? lastAdminMsg.sender_id === admin.id
       ? "You"
-      : names[lastAdminMsg.sender_id] ?? "A teammate"
+      : (lastAdminMsg.sender_id ? names[lastAdminMsg.sender_id] : undefined) ??
+        "A teammate"
     : null;
 
   return (

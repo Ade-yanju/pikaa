@@ -14,8 +14,8 @@ type MsgRow = {
   conversation_id: string;
   body: string | null;
   image_url: string | null;
-  sender_id: string;
-  sender_role: "user" | "admin";
+  sender_id: string | null;
+  sender_role: "user" | "admin" | "system";
   read_at: string | null;
 };
 

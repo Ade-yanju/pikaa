@@ -14,8 +14,8 @@ export type InboxItem = {
   preview: {
     body: string | null;
     image: boolean;
-    senderId: string;
-    role: "user" | "admin";
+    senderId: string | null;
+    role: "user" | "admin" | "system";
   } | null;
   unread: boolean;
 };
@@ -99,12 +99,13 @@ export default function InboxList({
     const p = item.preview;
     if (!p) return "No messages yet";
     const text = p.image && !p.body ? "📷 Photo" : p.body ?? "";
-    if (p.role === "admin") {
-      const who =
-        p.senderId === currentAdminId ? "You" : adminNames[p.senderId] ?? "Support";
-      return `${who}: ${text}`;
-    }
-    return text;
+    if (p.role === "user") return text;
+    if (p.role === "system") return `Pickar Support: ${text}`;
+    const who =
+      p.senderId && p.senderId === currentAdminId
+        ? "You"
+        : (p.senderId ? adminNames[p.senderId] : undefined) ?? "Support";
+    return `${who}: ${text}`;
   }
 
   if (items.length === 0) {
