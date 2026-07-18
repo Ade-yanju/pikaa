@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     title: "Pickar",
   },
   icons: { apple: "/pickar.png" },
+  // Google AdSense site verification (Meta tag method) — rendered into the
+  // raw <head>, so the AdSense crawler can always see it.
+  other: { "google-adsense-account": ADSENSE_CLIENT },
 };
 
 export const viewport: Viewport = {
