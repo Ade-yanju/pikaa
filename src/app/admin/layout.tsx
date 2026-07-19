@@ -6,6 +6,7 @@ import AppBackground from "@/components/AppBackground";
 import SideNav from "@/components/SideNav";
 import MessageNotifier from "@/components/MessageNotifier";
 import PushSetup from "@/components/PushSetup";
+import InstallPrompt from "@/components/InstallPrompt";
 
 export default async function AdminLayout({
   children,
@@ -19,6 +20,7 @@ export default async function AdminLayout({
       <AppBackground />
       <MessageNotifier currentUserId={admin.id} surface="admin" />
       <PushSetup />
+      <InstallPrompt />
 
       <header className="border-b border-white/10 bg-[#070909]/70 backdrop-blur-xl sticky top-0 z-40 pt-safe px-safe">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">

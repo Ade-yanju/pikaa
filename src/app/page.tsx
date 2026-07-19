@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import SiteFooter from "@/components/SiteFooter";
+import InstallPrompt from "@/components/InstallPrompt";
 import {
   ShieldCheck,
   ArrowRight,
@@ -89,6 +90,7 @@ export default function PickarLandingPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-slate-200 selection:bg-emerald-500/30 font-sans overflow-x-hidden relative">
       <SpotlightBackground />
+      <InstallPrompt />
 
       {/* NAVIGATION */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#050505]/70 backdrop-blur-xl pt-safe px-safe">

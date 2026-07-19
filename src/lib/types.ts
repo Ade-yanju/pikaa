@@ -122,6 +122,38 @@ export const TRADE_STATUS_LABELS: Record<TradeStatus, string> = {
 };
 
 // Combined style map so StatusBadge works for payments and trades.
+export type WithdrawalMethod =
+  | "bank"
+  | "paypal"
+  | "wise"
+  | "cashapp"
+  | "crypto"
+  | "other";
+
+export type WithdrawalDetail = {
+  id: string;
+  user_id: string;
+  method: WithdrawalMethod;
+  label: string | null;
+  account_name: string | null;
+  bank_name: string | null;
+  account_number_enc: string | null;
+  routing_enc: string | null;
+  currency: string | null;
+  extra: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export const WITHDRAWAL_METHOD_LABELS: Record<WithdrawalMethod, string> = {
+  bank: "Bank transfer",
+  paypal: "PayPal",
+  wise: "Wise",
+  cashapp: "Cash App",
+  crypto: "Crypto wallet",
+  other: "Other",
+};
+
 export const STATUS_TONES: Record<string, string> = {
   pending: "bg-amber-500/10 text-amber-400 border-amber-500/30",
   in_review: "bg-blue-500/10 text-blue-400 border-blue-500/30",

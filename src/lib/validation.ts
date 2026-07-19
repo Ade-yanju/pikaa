@@ -56,4 +56,15 @@ export const cryptoSchema = z.object({
   secret: z.string().trim().max(400).optional().or(z.literal("")), // wallet addr
 });
 
+export const withdrawalSchema = z.object({
+  method: z.enum(["bank", "paypal", "wise", "cashapp", "crypto", "other"]),
+  label: z.string().trim().max(60).optional().or(z.literal("")),
+  account_name: z.string().trim().max(120).optional().or(z.literal("")),
+  bank_name: z.string().trim().max(120).optional().or(z.literal("")),
+  account_number: z.string().trim().min(2, "Enter your account/wallet").max(140),
+  routing: z.string().trim().max(140).optional().or(z.literal("")),
+  currency: z.string().trim().max(8).optional().or(z.literal("")),
+  extra: z.string().trim().max(300).optional().or(z.literal("")),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;

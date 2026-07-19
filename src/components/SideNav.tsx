@@ -12,6 +12,7 @@ import {
   Gift,
   Bitcoin,
   ArrowLeftRight,
+  Banknote,
   type LucideIcon,
 } from "lucide-react";
 
@@ -29,6 +30,7 @@ const NAVS: Record<"user" | "admin", Item[]> = {
     { href: "/admin", label: "Inbox", short: "Inbox", icon: Inbox },
     { href: "/admin/requests", label: "Payment Requests", short: "Payments", icon: Wallet },
     { href: "/admin/trades", label: "Trades", short: "Trades", icon: ArrowLeftRight },
+    { href: "/admin/withdrawals", label: "Withdrawals", short: "Payouts", icon: Banknote },
     { href: "/admin/accounts", label: "Company Accounts", short: "Accounts", icon: Landmark },
     { href: "/admin/team", label: "Team & Admins", short: "Team", icon: Users },
   ],
