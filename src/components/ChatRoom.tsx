@@ -118,7 +118,19 @@ export default function ChatRoom({
   const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingSent = useRef(0);
 
+  // Keep a live view of messages so markRead can check before hitting the server.
+  const messagesRef = useRef(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  // Only invoke the read-receipt server function when something is actually
+  // unread — avoids needless Vercel function calls on mount/focus.
   const markRead = () => {
+    const hasUnread = messagesRef.current.some(
+      (m) => m.sender_id !== currentUserId && !m.read_at,
+    );
+    if (!hasUnread) return;
     markMessagesRead(conversationId).catch(() => {});
   };
 

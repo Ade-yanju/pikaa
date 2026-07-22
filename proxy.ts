@@ -67,6 +67,9 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Run on everything except static assets.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Only run session handling on the areas that actually need auth. Public
+  // pages (landing, marketing, auth) skip the proxy entirely, so they no longer
+  // spin up a serverless function or call Supabase on every visit — this is the
+  // single biggest cut to Vercel "Fluid Active CPU" and Function Invocations.
+  matcher: ["/dashboard/:path*", "/admin/:path*"],
 };
