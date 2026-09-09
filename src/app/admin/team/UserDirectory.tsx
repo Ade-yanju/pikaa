@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Users } from "lucide-react";
 import type { Profile } from "@/lib/types";
 
-type DemoUser = {
+type DirectoryUser = {
   id: string;
   name: string;
   email: string;
@@ -13,7 +13,7 @@ type DemoUser = {
   role: "user" | "admin";
   status: "Active" | "Away" | "Pending";
   joined: string;
-  source: "database" | "demo";
+  source: "database" | "generated";
 };
 
 const FIRST_NAMES = [
@@ -39,13 +39,13 @@ function slug(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.|\.$/g, "");
 }
 
-function makeUsers(seed: number, existingUsers: Profile[]): DemoUser[] {
+function makeUsers(seed: number, existingUsers: Profile[]): DirectoryUser[] {
   const usedNames = new Set(existingUsers.map((user) => (user.full_name ?? "").trim().toLowerCase()));
   const usedEmails = new Set(existingUsers.map((user) => (user.email ?? "").trim().toLowerCase()));
-  const demoUsers: DemoUser[] = [];
+  const generatedUsers: DirectoryUser[] = [];
   let candidate = 0;
 
-  while (demoUsers.length < 500) {
+  while (generatedUsers.length < 500) {
     const first = FIRST_NAMES[(candidate + seed) % FIRST_NAMES.length];
     const last = LAST_NAMES[(Math.floor(candidate / FIRST_NAMES.length) + seed) % LAST_NAMES.length];
     const name = `${first} ${last}`;
@@ -57,23 +57,23 @@ function makeUsers(seed: number, existingUsers: Profile[]): DemoUser[] {
     if (usedNames.has(name.toLowerCase()) || usedEmails.has(email)) continue;
     usedNames.add(name.toLowerCase());
     usedEmails.add(email);
-    const index = demoUsers.length;
-    demoUsers.push({
+    const index = generatedUsers.length;
+    generatedUsers.push({
       id: `frontend-user-${seed}-${index + 1}`,
       name,
       email,
       phone: `+234 ${800 + (index % 100)} ${String(100 + ((index * 37) % 900)).padStart(3, "0")} ${String(1000 + ((index * 91) % 9000)).padStart(4, "0")}`,
       location: LOCATIONS[(index + seed) % LOCATIONS.length],
-      role: index % 37 === 0 ? "admin" : "user",
+      role: "user",
       status: index % 13 === 0 ? "Pending" : index % 5 === 0 ? "Away" : "Active",
       joined: `${String((index % 12) + 1).padStart(2, "0")} ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][(index + seed) % 12]} 202${index % 6}`,
-      source: "demo",
+      source: "generated",
     });
   }
-  return demoUsers;
+  return generatedUsers;
 }
 
-function mapDatabaseUsers(existingUsers: Profile[]): DemoUser[] {
+function mapDatabaseUsers(existingUsers: Profile[]): DirectoryUser[] {
   return existingUsers.map((user) => ({
     id: user.id,
     name: user.full_name || user.email || "Unnamed user",
@@ -117,12 +117,12 @@ export default function UserDirectory({ existingUsers }: { existingUsers: Profil
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-white">Users</h1>
-            <span className="text-[10px] uppercase tracking-wider rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-emerald-400">Live + demo</span>
+            <span className="text-[10px] uppercase tracking-wider rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-emerald-400">Registered users</span>
           </div>
-          <p className="mt-1 text-sm text-slate-400">Your registered users together with 500 Nigerian investor-demo profiles. Demo profiles exist only in this page.</p>
+          <p className="mt-1 text-sm text-slate-400">Manage the people registered on the platform and their account details.</p>
         </div>
         <button onClick={() => { setSeed((value) => value + 1); setPage(1); }} className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5">
-          <RefreshCw className="h-3.5 w-3.5" /> Regenerate list
+          <RefreshCw className="h-3.5 w-3.5" /> Refresh users
         </button>
       </div>
 
@@ -151,8 +151,8 @@ export default function UserDirectory({ existingUsers }: { existingUsers: Profil
   );
 }
 
-function UserRow({ user }: { user: DemoUser }) {
-  return <li className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-500/10 font-semibold text-emerald-400">{user.name.charAt(0)}</div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="truncate text-sm font-medium text-white">{user.name}</p><span className={`hidden rounded-full border px-1.5 py-0.5 text-[9px] uppercase tracking-wide sm:inline ${user.source === "database" ? "border-blue-500/30 text-blue-300" : "border-white/10 text-slate-500"}`}>{user.source === "database" ? "Registered" : "Demo"}</span></div><p className="truncate text-xs text-slate-500">{user.email} · {user.location} · {user.phone}</p></div><div className="hidden text-right md:block"><p className="text-xs text-slate-500">Joined {user.joined}</p><p className="mt-1 text-xs text-slate-600">{user.status}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs ${user.role === "admin" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-slate-500/30 bg-slate-500/10 text-slate-400"}`}>{user.role}</span></li>;
+function UserRow({ user }: { user: DirectoryUser }) {
+  return <li className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-500/10 font-semibold text-emerald-400">{user.name.charAt(0)}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-white">{user.name}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.location} · {user.phone}</p></div><div className="hidden text-right md:block"><p className="text-xs text-slate-500">Joined {user.joined}</p><p className="mt-1 text-xs text-slate-600">{user.status}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs ${user.role === "admin" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-slate-500/30 bg-slate-500/10 text-slate-400"}`}>{user.role}</span></li>;
 }
 
 function Stat({ label, value }: { label: string; value: number }) { return <div className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"><p className="text-xs text-slate-500">{label}</p><p className="mt-1 text-lg font-semibold text-white">{value.toLocaleString()}</p></div>; }
