@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, RefreshCw, Search, Users } from "lucide-react";
 import type { Profile } from "@/lib/types";
+import RoleToggle from "./RoleToggle";
 
 type DirectoryUser = {
   id: string;
@@ -87,7 +88,7 @@ function mapDatabaseUsers(existingUsers: Profile[]): DirectoryUser[] {
   }));
 }
 
-export default function UserDirectory({ existingUsers }: { existingUsers: Profile[] }) {
+export default function UserDirectory({ existingUsers, currentAdminId }: { existingUsers: Profile[]; currentAdminId: string }) {
   const [seed, setSeed] = useState(1);
   const [query, setQuery] = useState("");
   const [role, setRole] = useState("all");
@@ -104,6 +105,7 @@ export default function UserDirectory({ existingUsers }: { existingUsers: Profil
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const totalUsers = users.length;
   const admins = users.filter((user) => user.role === "admin").length;
 
   function updateFilter(setter: (value: string) => void, value: string) {
@@ -126,9 +128,9 @@ export default function UserDirectory({ existingUsers }: { existingUsers: Profil
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Total users" value={users.length} />
-        <Stat label="Registered" value={existingUsers.length} />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <Stat label="Total users" value={totalUsers} />
+        <Stat label="Registered users" value={totalUsers} />
         <Stat label="Admins" value={admins} />
         <Stat label="Active" value={users.filter((user) => user.status === "Active").length} />
         <Stat label="Showing" value={filtered.length} />
@@ -141,7 +143,7 @@ export default function UserDirectory({ existingUsers }: { existingUsers: Profil
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
-        {visible.length ? <ul className="divide-y divide-white/5">{visible.map((user) => <UserRow key={user.id} user={user} />)}</ul> : <div className="p-10 text-center text-sm text-slate-500"><Users className="mx-auto mb-2 h-5 w-5" />No users match these filters.</div>}
+        {visible.length ? <ul className="divide-y divide-white/5">{visible.map((user) => <UserRow key={user.id} user={user} currentAdminId={currentAdminId} />)}</ul> : <div className="p-10 text-center text-sm text-slate-500"><Users className="mx-auto mb-2 h-5 w-5" />No users match these filters.</div>}
         <div className="flex items-center justify-between border-t border-white/5 px-4 py-3 text-xs text-slate-500">
           <span>{filtered.length ? `${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, filtered.length)} of ${filtered.length}` : "0 results"}</span>
           <div className="flex items-center gap-2"><button aria-label="Previous page" disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="rounded-md border border-white/10 p-1.5 hover:bg-white/5 disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button><span>Page {currentPage} of {pageCount}</span><button aria-label="Next page" disabled={currentPage === pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))} className="rounded-md border border-white/10 p-1.5 hover:bg-white/5 disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button></div>
@@ -151,8 +153,9 @@ export default function UserDirectory({ existingUsers }: { existingUsers: Profil
   );
 }
 
-function UserRow({ user }: { user: DirectoryUser }) {
-  return <li className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-500/10 font-semibold text-emerald-400">{user.name.charAt(0)}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-white">{user.name}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.location} · {user.phone}</p></div><div className="hidden text-right md:block"><p className="text-xs text-slate-500">Joined {user.joined}</p><p className="mt-1 text-xs text-slate-600">{user.status}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs ${user.role === "admin" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-slate-500/30 bg-slate-500/10 text-slate-400"}`}>{user.role}</span></li>;
+function UserRow({ user, currentAdminId }: { user: DirectoryUser; currentAdminId: string }) {
+  const canChangeRole = user.source === "database" && user.id !== currentAdminId;
+  return <li className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-5"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-500/10 font-semibold text-emerald-400">{user.name.charAt(0)}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-white">{user.name}{user.id === currentAdminId && <span className="font-normal text-slate-500"> · You</span>}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.location} · {user.phone}</p></div><div className="hidden text-right md:block"><p className="text-xs text-slate-500">Joined {user.joined}</p><p className="mt-1 text-xs text-slate-600">{user.status}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-xs ${user.role === "admin" ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-slate-500/30 bg-slate-500/10 text-slate-400"}`}>{user.role}</span>{canChangeRole ? <RoleToggle userId={user.id} role={user.role} /> : <span className="hidden w-[104px] text-right text-xs text-slate-600 sm:inline">—</span>}</li>;
 }
 
 function Stat({ label, value }: { label: string; value: number }) { return <div className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3"><p className="text-xs text-slate-500">{label}</p><p className="mt-1 text-lg font-semibold text-white">{value.toLocaleString()}</p></div>; }
