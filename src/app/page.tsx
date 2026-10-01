@@ -79,8 +79,8 @@ const LiveTicker = () => {
 
 // --- MAIN PAGE COMPONENT ---
 export default function PickarLandingPage() {
-  const escrowWhatsAppNumber = "+2348142675476";
-  const supportPhoneNumber = "+2348142675476";
+  const escrowWhatsAppNumber = "+2347046094344";
+  const supportPhoneNumber = "+2347046094344";
 
   const whatsappMessage = encodeURIComponent(
     "Hello Pickar, I want to set up a secure transaction.",
