@@ -25,6 +25,7 @@ const NAVS: Record<"user" | "admin", Item[]> = {
     { href: "/dashboard/requests", label: "Payment Requests", short: "Payments", icon: Wallet },
     { href: "/dashboard/gift-cards", label: "Sell Gift Card", short: "Gift Cards", icon: Gift },
     { href: "/dashboard/crypto", label: "Trade Crypto", short: "Crypto", icon: Bitcoin },
+    { href: "/dashboard/affiliates", label: "Refer & Earn", short: "Refer", icon: Users },
   ],
   admin: [
     { href: "/admin", label: "Inbox", short: "Inbox", icon: Inbox },

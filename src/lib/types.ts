@@ -12,6 +12,20 @@ export type Profile = {
   country: string | null;
   phone: string | null;
   role: Role;
+  affiliate_code?: string | null;
+  referred_by?: string | null;
+  created_at: string;
+};
+
+export type AffiliateReward = {
+  id: string;
+  referrer_id: string;
+  referred_user_id: string;
+  trade_id: string | null;
+  reward_type: "signup" | "trade";
+  amount: number;
+  currency: string;
+  description: string;
   created_at: string;
 };
 

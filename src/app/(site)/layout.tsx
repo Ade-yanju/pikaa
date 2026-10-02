@@ -21,6 +21,9 @@ export default function SiteLayout({
             <Link href="/careers" className="hidden sm:inline text-slate-400 hover:text-white transition-colors">
               Careers
             </Link>
+            <Link href="/affiliates" className="hidden sm:inline text-slate-400 hover:text-white transition-colors">
+              Affiliates
+            </Link>
             <Link href="/login" className="text-slate-300 hover:text-white transition-colors">
               Log in
             </Link>

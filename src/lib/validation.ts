@@ -7,6 +7,7 @@ export const registerSchema = z.object({
   email: emailSchema,
   country: z.string().trim().min(2, "Select your country").max(60),
   phone: z.string().trim().max(30).optional().or(z.literal("")),
+  referral_code: z.string().trim().toUpperCase().max(30).optional().or(z.literal("")),
 });
 
 export const otpSchema = z.object({

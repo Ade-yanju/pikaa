@@ -41,12 +41,19 @@ export default function AuthForm({
 
   const [countryCode, setCountryCode] = useState("US");
   const [phoneLocal, setPhoneLocal] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const country =
     COUNTRIES.find((c) => c.code === countryCode) ?? COUNTRIES[0];
 
   useEffect(() => {
     if (sent) otpRef.current?.focus();
   }, [sent]);
+
+  useEffect(() => {
+    if (mode !== "register") return;
+    const code = new URLSearchParams(window.location.search).get("ref");
+    if (code) setReferralCode(code.toUpperCase());
+  }, [mode]);
 
   if (sent) {
     return (
@@ -149,6 +156,21 @@ export default function AuthForm({
             name="phone"
             value={phoneLocal.trim() ? `${country.dial} ${phoneLocal.trim()}` : ""}
           />
+
+          <label className="block">
+            <span className="text-sm text-slate-300">Referral code (optional)</span>
+            <input
+              name="referral_code"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+              placeholder="PKR-XXXXXXXX"
+              autoCapitalize="characters"
+              className="mt-1.5 w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 outline-none focus:border-emerald-500/60 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+            />
+            <span className="text-[11px] text-slate-600 mt-1 block">
+              Enter a friend&apos;s code so they can earn when you trade.
+            </span>
+          </label>
         </>
       )}
       <Field

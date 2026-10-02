@@ -38,6 +38,14 @@ attachments need them.
 
 Run `npm run check-setup` to confirm what's wired.
 
+### Affiliates
+
+After the base schema is installed, run
+[`supabase/migrations/008_affiliates.sql`](supabase/migrations/008_affiliates.sql)
+in the Supabase SQL Editor. This adds referral codes, the ₦1,000 signup reward,
+and the default 1% commission on a referred user's completed trade. The
+affiliate page is available at `/dashboard/affiliates`.
+
 ## 4. Make yourself an admin
 1. Run the app, go to `/register`, sign up with your email, verify the OTP.
 2. Back in Supabase **SQL Editor**, run:

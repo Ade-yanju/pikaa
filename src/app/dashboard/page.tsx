@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, MessagesSquare, Wallet, Clock, CheckCircle2, Gift, Bitcoin, ShieldCheck } from "lucide-react";
+import { ArrowRight, MessagesSquare, Wallet, Clock, CheckCircle2, Gift, Bitcoin, ShieldCheck, Users } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { requireUser } from "@/lib/dal";
 import { WHATSAPP_CHANNEL_URL } from "@/lib/constants";
@@ -97,6 +97,13 @@ export default async function DashboardHome() {
             title="Trade cryptocurrency"
             desc="Buy or sell BTC, ETH, USDT and more — wallet details stay encrypted."
             cta="Trade crypto"
+          />
+          <ActionCard
+            href="/dashboard/affiliates"
+            icon={<Users className="w-5 h-5" />}
+            title="Refer & earn"
+            desc="Invite friends to Pickar and earn ₦1,000 for each signup plus trade commissions."
+            cta="View rewards"
           />
         </div>
       </div>

@@ -112,11 +112,12 @@ export async function requestRegister(
     email: formData.get("email"),
     country: formData.get("country"),
     phone: formData.get("phone"),
+    referral_code: formData.get("referral_code"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Check your details." };
   }
-  const { full_name, email, country, phone } = parsed.data;
+  const { full_name, email, country, phone, referral_code } = parsed.data;
 
   // One account per email — send existing users to log in instead.
   if (await profileExists(email)) {
@@ -129,7 +130,12 @@ export async function requestRegister(
   const { data: created, error } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
-    user_metadata: { full_name, country, phone: phone || null },
+    user_metadata: {
+      full_name,
+      country,
+      phone: phone || null,
+      referral_code: referral_code || null,
+    },
   });
   if (error) {
     console.error("createUser failed:", error.message);
